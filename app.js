@@ -22,7 +22,7 @@ var Game = mongoose.model("game");
 
 //example routes
 app.get("/", function(req, res){
-    res.send("Hello World");
+    res.send("gameList.html");
 })
 
 app.get("/lezduit", function(req, res){
@@ -39,10 +39,56 @@ app.post("/saveGame", function(req,res){
 })
 
 app.get("/getGames", function(req,res){
-    Game.find({}).then(function(game){
-        console.log({game});
+    Game.find({}).sort({"game":1}).then(function(game){
+       // console.log({game});
         res.json({game});
     })
+})
+
+app.post("/deleteGame", function(req, res){
+    console.log(`Game Deleted ${req.body.game}`);
+    Game.findByIdAndDelete(req.body.game).exec();
+    res.redirect('gameList.html');
+})
+
+app.post("/getID", function(req, res){
+    console.log(req.body.game._id)
+    res.redirect("/updatePage.html" + "?id=" + req.body.game)
+})
+
+app.post("/updateGame", function(req, res){
+    console.log(req.body);
+    Game.findByIdAndUpdate(req.body.id, { game: req.body.game}, function(err, docs){
+        if(err){
+            console.log(err)
+        }
+        else{
+            console.log("Updated User : ", docs);
+            res.redirect("gameList.html");
+        }
+    })
+})
+
+//Unity Route
+app.post("/unity", function(req, res){
+    console.log("Hello from Unity");
+
+    var newData = {
+        "level": req.body.level,
+        "timeElapsed": req.body.timeElapsed,
+        "name": req.body.name
+    };
+    console.log(newData)
+});
+
+app.get("/SendUnityData", function(req, res){
+    console.log("Request Made");
+    var dataToSend = {
+        "level": 9000,
+        "timeElapsed": 20100.32,
+        "name": "George Saban"
+    }
+    res.send(dataToSend);
 })
 
 app.use(express.static(__dirname+"/pages"));
